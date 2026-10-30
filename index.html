@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="uz" class="scroll-smooth">
+<head>
+    <script>try{if(localStorage.getItem("daryo-theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARYO — Restoran, Yetkazib Berish va Admin Tizimi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        daryo: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        html { font-size: 17px; }
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 9999px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50% { opacity: 0.65; transform: scale(1.06); }
+        }
+        .glow-effect { animation: pulseGlow 6s infinite ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 transition-colors duration-300 antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- TOP STICKY GLASS HEADER -->
+    <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/90 dark:bg-[#090d16]/90 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
+            
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group shrink-0">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center text-white shadow-lg shadow-blue-600/30 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-water text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white block leading-none">DARYO</span>
+                    <span data-i18n="brandSubtitle" class="text-[11px] font-bold uppercase tracking-widest text-blue-600 dark:text-sky-400 block mt-0.5">Restoran & Delivery</span>
+                </div>
+            </a>
+
+            <!-- Desktop Quick Search -->
+            <div class="hidden lg:flex items-center flex-1 max-w-md mx-6">
+                <div class="relative w-full">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        oninput="handleSearch(this.value)"
+                        placeholder="Taomlarni qidirish... (Kabob, Osh, Set)" 
+                        class="w-full pl-11 pr-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:text-white transition"
+                    >
+                </div>
+            </div>
+
+            <!-- Action Controls: UZ/RU, Dark/Light, Booking, Admin Panel, Cart -->
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                
+                <!-- Language Switcher (UZ | RU) -->
+                <div class="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <button onclick="setLanguage('uz')" id="lang-uz" class="px-2.5 py-1 rounded-lg text-xs font-extrabold transition bg-blue-600 text-white shadow-sm">UZ</button>
+                    <button onclick="setLanguage('ru')" id="lang-ru" class="px-2.5 py-1 rounded-lg text-xs font-extrabold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">RU</button>
+                </div>
+
+                <!-- Theme Toggle Button (Oq / Qora fon) -->
+                <button onclick="toggleTheme()" id="theme-btn" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition" title="Oq / Qora fon">
+                    <i id="theme-icon" class="fa-solid fa-sun text-base"></i>
+                </button>
+
+                <!-- Cart Trigger -->
+                <button onclick="toggleCart()" class="relative flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition transform active:scale-95">
+                    <i class="fa-solid fa-bag-shopping text-base"></i>
+                    <span id="header-cart-total" class="hidden md:inline">0 so'm</span>
+                    <span id="cart-badge" class="bg-white text-blue-700 text-xs font-black px-2 py-0.5 rounded-full shadow-sm">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar -->
+        <div class="lg:hidden px-4 pb-3">
+            <div class="relative w-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input 
+                    type="text" 
+                    id="mobile-search-input" 
+                    oninput="handleSearch(this.value)"
+                    placeholder="Taomlarni qidirish..." 
+                    class="w-full pl-11 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:text-white"
+                >
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative overflow-hidden pt-6 pb-12 md:py-14">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/15 dark:bg-blue-600/20 rounded-full blur-3xl pointer-events-none glow-effect"></div>
+        <div class="absolute top-1/2 right-0 w-80 h-80 bg-sky-500/15 dark:bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-3xl p-6 sm:p-10 lg:p-12 border border-blue-800/40 shadow-2xl text-white grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- Left Column -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2.5 bg-blue-500/20 border border-blue-400/30 px-4 py-1.5 rounded-full">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 -ml-5"></span>
+                        <span data-i18n="heroBadge" class="text-xs font-bold text-sky-300 tracking-wide">Ochiq 10:00 - 02:00 • Yetkazib berish 35 daqiqa</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08]">
+                        <span data-i18n="heroTitle1">DARYO — Haqiqiy ta'm va</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-400 block mt-1" data-i18n="heroTitle2">yuqori xizmat standarti</span>
+                    </h1>
+
+                    <p data-i18n="heroDesc" class="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+                        Saralangan yangi go'shtdan ko'mirda pishirilgan kaboblar, an'anaviy milliy taomlar va katta oilaviy setlar. Issiq holda uyingizgacha yetkazib beramiz yoki restoranimizda kutib qolamiz.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-4 pt-1">
+                        <a href="#menu-section" class="bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-7 py-4 rounded-2xl shadow-xl shadow-blue-600/30 transition flex items-center gap-3 text-sm">
+                            <i class="fa-solid fa-utensils"></i>
+                            <span data-i18n="btnOrderNow">Menyuni ko'rish</span>
+                        </a>
+                        <a href="#booking-section" class="bg-white/10 hover:bg-white/20 text-white border border-white/15 font-extrabold px-7 py-4 rounded-2xl transition flex items-center gap-3 text-sm">
+                            <i class="fa-solid fa-chair text-sky-400"></i>
+                            <span data-i18n="btnBookTable">Stol band qilish</span>
+                        </a>
+                    </div>
+
+                    <!-- Highlights Row -->
+                    <div class="grid grid-cols-3 gap-3 pt-4 border-t border-white/10">
+                        <div>
+                            <p class="text-xl sm:text-2xl font-black text-sky-400">35 daq</p>
+                            <p data-i18n="stat1" class="text-xs text-slate-300">Tezkor yetkazish</p>
+                        </div>
+                        <div>
+                            <p class="text-xl sm:text-2xl font-black text-sky-400">100%</p>
+                            <p data-i18n="stat2" class="text-xs text-slate-300">Halol va yangi</p>
+                        </div>
+                        <div>
+                            <p class="text-xl sm:text-2xl font-black text-sky-400">4.9 ★</p>
+                            <p data-i18n="stat3" class="text-xs text-slate-300">Mijozlar bahosi</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Featured Set Showcase -->
+                <div class="lg:col-span-5">
+                    <div class="bg-slate-900/90 border border-blue-500/30 rounded-3xl overflow-hidden shadow-2xl">
+                        <div class="relative h-64 sm:h-72 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80" alt="Daryo Set" class="w-full h-full object-cover hover:scale-105 transition duration-700">
+                            <div class="absolute top-3 left-3 flex gap-2">
+                                <span class="bg-blue-600 text-white text-xs font-extrabold px-3 py-1 rounded-full shadow uppercase" data-i18n="heroCardTag">Kunning Xiti</span>
+                                <span class="bg-slate-950/80 backdrop-blur-md text-sky-300 text-xs font-bold px-3 py-1 rounded-full">1.4 kg</span>
+                            </div>
+                            <div class="absolute bottom-3 right-3 bg-slate-950/90 backdrop-blur-md px-4 py-1.5 rounded-xl border border-blue-500/30">
+                                <span class="text-lg font-black text-sky-400">225,000 <small class="text-xs font-bold">so'm</small></span>
+                            </div>
+                        </div>
+                        <div class="p-5 flex items-center justify-between gap-4">
+                            <div>
+                                <h3 data-i18n="heroDishName" class="text-lg font-extrabold text-white">DARYO Shohona Mangal Set</h3>
+                                <p data-i18n="heroDishDesc" class="text-xs text-slate-400 mt-1">Qo'y qovurg'asi, lula kabob, jigar, qanotchalar, kartoshka va 2 xil sous</p>
+                            </div>
+                            <button onclick="addToCart(3)" class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 transition transform active:scale-90">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- MENU SECTION -->
+    <section id="menu-section" class="py-8 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+            <div>
+                <span data-i18n="menuSubtitle" class="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-sky-400">DARYO OSHXONASI</span>
+                <h2 data-i18n="menuTitle" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">Restoran Menyusi</h2>
+            </div>
+
+            <!-- Menu Search & Sort Filter -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input 
+                        type="text" 
+                        id="menu-search-input" 
+                        oninput="handleSearch(this.value)"
+                        placeholder="Taom qidirish..." 
+                        class="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 dark:text-white transition"
+                    >
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="sort-select" data-i18n="sortLabel" class="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0">Saralash:</label>
+                    <select id="sort-select" onchange="handleSort(this.value)" class="w-full sm:w-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <option value="popular" data-i18n="sortPopular">Ommabop</option>
+                        <option value="price-asc" data-i18n="sortCheap">Arzonroq</option>
+                        <option value="price-desc" data-i18n="sortExpensive">Qimmatroq</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Category Filter Pills -->
+        <div class="sticky top-20 z-30 py-3 bg-slate-50/95 dark:bg-[#090d16]/95 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/70 mb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div id="category-bar" class="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1"></div>
+        </div>
+
+        <!-- Menu Grid -->
+        <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+
+        <!-- Empty Search State -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-sky-400 flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h3 data-i18n="emptyTitle" class="text-lg font-bold text-slate-900 dark:text-white">Taom topilmadi</h3>
+            <button onclick="resetFilters()" class="mt-4 px-5 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition" data-i18n="resetBtn">Barcha taomlarni ko'rsatish</button>
+        </div>
+    </section>
+
+    <!-- TABLE BOOKING SECTION -->
+    <section id="booking-section" class="py-14 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-12 shadow-xl">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                
+                <!-- Left Zone Selector -->
+                <div class="lg:col-span-6 space-y-5">
+                    <span class="inline-block bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-sky-400 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider" data-i18n="bookTag">Online Bron Qilish</span>
+                    <h2 data-i18n="bookTitle" class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white leading-tight">DARYO restoranida joyingizni oldindan band qiling</h2>
+                    <p data-i18n="bookDesc" class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        Oilaviy tushlik, do'stlar bilan kechki ovqat yoki muhim uchrashuvlar uchun qulay hududni tanlang. Bron ma'lumotlari to'g'ridan-to'g'ri Admin Panelga tushadi.
+                    </p>
+
+                    <div class="space-y-2.5 pt-2">
+                        <p data-i18n="selectZoneLabel" class="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-sky-400">Hududni tanlang:</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button type="button" onclick="selectZone('Asosiy Zal', this)" class="zone-btn active text-left p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50/70 dark:bg-blue-950/60 transition">
+                                <i class="fa-solid fa-utensils text-blue-600 dark:text-sky-400 mb-1.5 block"></i>
+                                <span data-i18n="zone1Title" class="font-extrabold text-xs block text-slate-900 dark:text-white">Asosiy Zal</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">2-6 kishilik</span>
+                            </button>
+                            <button type="button" onclick="selectZone('Oilaviy Kabina', this)" class="zone-btn text-left p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500 transition">
+                                <i class="fa-solid fa-users text-blue-600 dark:text-sky-400 mb-1.5 block"></i>
+                                <span data-i18n="zone2Title" class="font-extrabold text-xs block text-slate-900 dark:text-white">Oilaviy Kabina</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">6-8 kishilik</span>
+                            </button>
+                            <button type="button" onclick="selectZone('Daryo Terrasa', this)" class="zone-btn text-left p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500 transition">
+                                <i class="fa-solid fa-water text-blue-600 dark:text-sky-400 mb-1.5 block"></i>
+                                <span data-i18n="zone3Title" class="font-extrabold text-xs block text-slate-900 dark:text-white">Daryo Terrasa</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Ochiq havo</span>
+                            </button>
+                            <button type="button" onclick="selectZone('VIP Zal', this)" class="zone-btn text-left p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500 transition">
+                                <i class="fa-solid fa-crown text-amber-500 mb-1.5 block"></i>
+                                <span data-i18n="zone4Title" class="font-extrabold text-xs block text-slate-900 dark:text-white">VIP Zal</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">10-16 kishilik</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Form -->
+                <div class="lg:col-span-6">
+                    <form id="booking-form" onsubmit="handleBooking(event)" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl space-y-4">
+                        <input type="hidden" id="selected-zone" value="Asosiy Zal">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label data-i18n="formName" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Ismingiz</label>
+                                <input type="text" id="b-name" required placeholder="Sardorbek" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600">
+                            </div>
+                            <div>
+                                <label data-i18n="formPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Telefon raqam</label>
+                                <input type="tel" id="b-phone" required placeholder="+998 90 123 45 67" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600">
+                            </div>
+                            <div>
+                                <label data-i18n="formDate" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Sana va Vaqt</label>
+                                <input type="datetime-local" id="b-time" required class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600">
+                            </div>
+                            <div>
+                                <label data-i18n="formGuests" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Mehmonlar soni</label>
+                                <select id="b-guests" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600">
+                                    <option value="2 kishi">2 kishi</option>
+                                    <option value="4 kishi" selected>4 kishi</option>
+                                    <option value="6 kishi">6 kishi</option>
+                                    <option value="8-12 kishi">8-12 kishi</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-xl shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span data-i18n="formSubmit">Stolni Band Qilish</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="about-section" class="py-12 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8"><span class="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-sky-400">NEGA DARYO</span><h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 mb-8">Bizni tanlashning 4 sababi</h2>
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm"><div class="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-600 dark:text-sky-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-fire-flame-curved"></i></div><h3 class="font-extrabold text-slate-900 dark:text-white">Koʻmirda pishirish</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Kabob va mangal taomlari haqiqiy koʻmirda tayyorlanadi.</p></div><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm"><div class="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-600 dark:text-sky-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-truck-fast"></i></div><h3 class="font-extrabold text-slate-900 dark:text-white">35 daqiqada yetkazish</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Issiq holda, Toshkent boʻylab tezkor kuryer xizmati.</p></div><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm"><div class="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-600 dark:text-sky-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-certificate"></i></div><h3 class="font-extrabold text-slate-900 dark:text-white">100% halol</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Saralangan yangi goʻsht va ishonchli yetkazib beruvchilar.</p></div><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm"><div class="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-600 dark:text-sky-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-users"></i></div><h3 class="font-extrabold text-slate-900 dark:text-white">Katta tadbirlar</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Toʻy, banket va oilaviy kechalar uchun VIP zal va kabinalar.</p></div></div></section>
+<section class="py-12 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8"><span class="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-sky-400">QANDAY ISHLAYDI</span><h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 mb-8">Buyurtma — 3 qadamda</h2>
+<div class="grid md:grid-cols-3 gap-6"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm"><div class="text-4xl font-black text-blue-600 dark:text-sky-400 mb-2">1</div><h3 class="font-extrabold text-slate-900 dark:text-white">Taom tanlang</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Menyudan kerakli taomlarni savatga qoʻshing.</p></div><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm"><div class="text-4xl font-black text-blue-600 dark:text-sky-400 mb-2">2</div><h3 class="font-extrabold text-slate-900 dark:text-white">Buyurtma bering</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Ism, telefon va manzilni kiriting.</p></div><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm"><div class="text-4xl font-black text-blue-600 dark:text-sky-400 mb-2">3</div><h3 class="font-extrabold text-slate-900 dark:text-white">Restoran tasdiqlaydi</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Buyurtmangiz restoranga darhol yetib boradi va tayyorlanadi.</p></div></div></section>
+<section id="reviews-section" class="py-12 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+<span class="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-sky-400">SHARHLAR</span>
+<div class="flex flex-wrap items-end justify-between gap-3 mt-1 mb-8"><h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">Mijozlar fikri</h2><p id="reviews-summary" class="text-sm font-bold text-slate-500 dark:text-slate-400"></p></div>
+<div class="grid lg:grid-cols-5 gap-6">
+<div id="reviews-list" class="lg:col-span-3 grid sm:grid-cols-2 gap-4 content-start"></div>
+<form onsubmit="submitReview(event)" class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-3 h-fit">
+<h3 class="font-extrabold text-slate-900 dark:text-white">Sharh qoldiring</h3>
+<input id="r-name" required maxlength="60" placeholder="Ismingiz" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600">
+<select id="r-rating" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"><option value="5">★★★★★ — Aʼlo</option><option value="4">★★★★☆ — Yaxshi</option><option value="3">★★★☆☆ — Oʻrtacha</option><option value="2">★★☆☆☆ — Yomon</option><option value="1">★☆☆☆☆ — Juda yomon</option></select>
+<textarea id="r-text" required minlength="3" maxlength="500" rows="4" placeholder="Fikringizni yozing..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"></textarea>
+<button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 rounded-xl shadow-lg shadow-blue-600/30 transition text-sm"><i class="fa-solid fa-paper-plane mr-2"></i>Yuborish</button>
+</form></div></section>
+<section id="contact-section" class="py-12 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+<span class="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-sky-400">BIZNING MANZIL</span>
+<div class="grid lg:grid-cols-5 gap-6 mt-3">
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm !p-8 flex flex-col justify-center gap-5">
+<div class="w-16 h-16 rounded-3xl bg-blue-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-blue-600/30"><i class="fa-solid fa-location-dot"></i></div>
+<h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white leading-tight">Toshkent sh., Bunyodkor shoh koʻchasi, 15</h2>
+<p class="text-lg font-bold text-slate-600 dark:text-slate-300"><i class="fa-solid fa-clock text-blue-600 dark:text-sky-400 mr-2"></i>Har kuni 10:00 – 02:00</p>
+<a href="https://www.google.com/maps/dir/?api=1&destination=Bunyodkor+shoh+ko%27chasi+15%2C+Tashkent" target="_blank" rel="noopener" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-6 py-4 rounded-2xl text-center shadow-lg shadow-blue-600/30 transition"><i class="fa-solid fa-route mr-2"></i>Yoʻnalish olish</a>
+</div>
+<div class="lg:col-span-3 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm min-h-[420px]">
+<iframe title="DARYO xaritada" src="https://www.google.com/maps?q=Bunyodkor+shoh+ko%27chasi+15%2C+Tashkent&output=embed" class="w-full h-full min-h-[420px] border-0" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+</div></div></section>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-10 mt-10">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold">
+                    <i class="fa-solid fa-water"></i>
+                </div>
+                <span class="text-base font-black text-slate-900 dark:text-white">DARYO</span>
+                <span>• Toshkent sh., Bunyodkor shoh ko'chasi, 15</span>
+            </div>
+            <div>© 2026 DARYO Restorani. Barcha huquqlar himoyalangan.</div>
+        </div>
+    </footer>
+
+    <!-- SLIDE-OVER CART DRAWER (PROMOKODSIZ) -->
+    <div id="cart-modal" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onclick="toggleCart()"></div>
+        <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col">
+                
+                <!-- Cart Header -->
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                        <div>
+                            <h3 data-i18n="cartTitle" class="text-base font-extrabold text-slate-900 dark:text-white">Buyurtma savati</h3>
+                            <p id="cart-count-subtitle" class="text-xs text-slate-500 dark:text-slate-400">0 ta mahsulot</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleCart()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white font-bold">&times;</button>
+                </div>
+
+                <!-- Delivery / Pickup Toggle -->
+                <div class="px-5 pt-4">
+                    <div class="grid grid-cols-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                        <button onclick="setOrderMode('delivery')" id="mode-delivery" class="py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition" data-i18n="modeDelivery">Yetkazib berish</button>
+                        <button onclick="setOrderMode('pickup')" id="mode-pickup" class="py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 transition" data-i18n="modePickup">Olib ketish</button>
+                    </div>
+                </div>
+
+                <!-- Cart Items List -->
+                <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+
+                <!-- Customer Details & Total (NO PROMO CODE) -->
+                <div class="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/90 space-y-3">
+                    <div class="space-y-2">
+                        <input type="text" id="order-name" placeholder="Ismingiz / Ваше имя" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs dark:text-white focus:outline-none focus:border-blue-600">
+                        <input type="tel" id="order-phone" placeholder="Telefon raqamingiz (+998...)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs dark:text-white focus:outline-none focus:border-blue-600">
+                        <input type="text" id="order-address" placeholder="Yetkazib berish manzili..." class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs dark:text-white focus:outline-none focus:border-blue-600">
+                    </div>
+
+                    <div class="space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800 text-xs">
+                        <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                            <span data-i18n="subtotalLabel">Taomlar:</span>
+                            <span id="cart-subtotal">0 so'm</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                            <span data-i18n="deliveryLabel">Yetkazib berish:</span>
+                            <span id="cart-delivery">15,000 so'm</span>
+                        </div>
+                        <div class="flex justify-between text-base font-black text-slate-900 dark:text-white pt-1">
+                            <span data-i18n="totalLabel">Jami:</span>
+                            <span id="cart-total" class="text-blue-600 dark:text-sky-400">0 so'm</span>
+                        </div>
+                    </div>
+
+                    <button onclick="submitOrder()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span data-i18n="checkoutBtn">Buyurtma berish</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SECRET PIN MODAL (FAQAT QIDIRUVGA admin777 YOZILGANDA OCHILADI) -->
+    <div id="pin-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md" onclick="closePinModal()"></div>
+        <form onsubmit="verifyPin(event)" class="relative w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl text-center space-y-4 z-10">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600/15 text-blue-600 dark:text-sky-400 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-user-lock"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-slate-900 dark:text-white">Maxfiy Kirish</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Admin panelni ochish uchun PIN-kodni kiriting</p>
+            </div>
+            <input type="password" id="pin-input" maxlength="8" placeholder="••••" class="w-full text-center tracking-[0.5em] text-xl font-black px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+            <p id="pin-error" class="text-xs font-bold text-red-500 hidden">Noto'g'ri PIN-kod! Qaytadan urinib ko'ring.</p>
+            <div class="flex gap-2.5 pt-1">
+                <button type="button" onclick="closePinModal()" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-extrabold transition">Bekor qilish</button>
+                <button type="submit" class="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 transition">Tasdiqlash</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- FULL-FEATURED INTERACTIVE ADMIN PANEL MODAL -->
+    <div id="admin-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md" onclick="toggleAdmin()"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-3 sm:p-6">
+            <div class="relative w-full max-w-6xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden z-10">
+                
+                <!-- Admin Topbar -->
+                <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white px-6 py-5 flex items-center justify-between border-b border-blue-900/50">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
+                            <i class="fa-solid fa-gauge-high text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 data-i18n="adminHeaderTitle" class="text-lg font-black tracking-tight">DARYO — Admin Boshqaruv Paneli</h3>
+                            <p data-i18n="adminHeaderSub" class="text-xs text-sky-300">Buyurtmalar, stol bronlari va menyuni real vaqtda boshqarish</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleAdmin()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-red-600 text-white text-xs font-extrabold transition">
+                        ✕ <span data-i18n="closeBtn">Yopish</span>
+                    </button>
+                </div>
+
+                <!-- Admin Content -->
+                <div class="p-6 space-y-6 max-h-[82vh] overflow-y-auto">
+                    
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-4 rounded-2xl bg-blue-50/80 dark:bg-slate-800/80 border border-blue-200/70 dark:border-slate-700">
+                            <span data-i18n="kpiRevenue" class="text-xs text-slate-500 dark:text-slate-400 font-bold">Jami Tushum</span>
+                            <p id="stat-revenue" class="text-xl sm:text-2xl font-black text-blue-600 dark:text-sky-400 mt-1">0 so'm</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-blue-50/80 dark:bg-slate-800/80 border border-blue-200/70 dark:border-slate-700">
+                            <span data-i18n="kpiOrders" class="text-xs text-slate-500 dark:text-slate-400 font-bold">Buyurtmalar</span>
+                            <p id="stat-orders" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-blue-50/80 dark:bg-slate-800/80 border border-blue-200/70 dark:border-slate-700">
+                            <span data-i18n="kpiBookings" class="text-xs text-slate-500 dark:text-slate-400 font-bold">Stol Bronlari</span>
+                            <p id="stat-bookings" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-blue-50/80 dark:bg-slate-800/80 border border-blue-200/70 dark:border-slate-700">
+                            <span data-i18n="kpiMenu" class="text-xs text-slate-500 dark:text-slate-400 font-bold">Menyudagi Taomlar</span>
+                            <p id="stat-items" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Tabs -->
+                    <div class="flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <button onclick="switchAdminTab('orders')" id="tab-orders" class="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-extrabold transition shadow-sm">
+                            <i class="fa-solid fa-receipt mr-1.5"></i> <span data-i18n="tabOrders">Buyurtmalar</span>
+                        </button>
+                        <button onclick="switchAdminTab('bookings')" id="tab-bookings" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-extrabold transition">
+                            <i class="fa-solid fa-calendar-check mr-1.5"></i> <span data-i18n="tabBookings">Stol Bronlari</span>
+                        </button>
+                        <button onclick="switchAdminTab('menu')" id="tab-menu" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-extrabold transition">
+                            <i class="fa-solid fa-utensils mr-1.5"></i> <span data-i18n="tabMenu">Menyu Boshqaruvi (+ Taom qo'shish)</span>
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: ORDERS LIST -->
+                    <div id="admin-orders-sec" class="space-y-3"></div>
+
+                    <!-- TAB 2: TABLE BOOKINGS LIST -->
+                    <div id="admin-bookings-sec" class="space-y-3 hidden"></div>
+
+                    <!-- TAB 3: MENU CRUD -->
+                    <div id="admin-menu-sec" class="space-y-6 hidden">
+                        <form onsubmit="addAdminFood(event)" class="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="sm:col-span-3 font-extrabold text-sm text-blue-600 dark:text-sky-400 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-plus"></i>
+                                <span data-i18n="addDishTitle">Yangi taom qo'shish (Darhol menyuga tushadi)</span>
+                            </div>
+                            <input type="text" id="f-name-uz" required placeholder="Taom nomi (UZ) - masalan: Qozon Kabob" class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs dark:text-white">
+                            <input type="text" id="f-name-ru" required placeholder="Название блюда (RU) - Казан Кебаб" class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs dark:text-white">
+                            <input type="number" id="f-price" required placeholder="Narxi (so'm) - masalan: 68000" class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs dark:text-white">
+                            <select id="f-cat" class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs dark:text-white">
+                                <option value="milliy">Milliy taomlar / Национальные</option>
+                                <option value="mangal">Shashlik va Kabob / Шашлык и Кебаб</option>
+                                <option value="fastfood">Fast-Food / Фаст-фуд</option>
+                                <option value="sets">Setlar / Сеты</option>
+                                <option value="drinks">Ichimliklar / Напитки</option>
+<option value="soups">Sho'rvalar / Супы</option>
+<option value="salads">Salatlar / Салаты</option>
+<option value="desserts">Shirinliklar / Десерты</option>
+                            </select>
+                            <input type="text" id="f-weight" required placeholder="Vazni (masalan: 400g yoki 1L)" class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs dark:text-white">
+                            <input type="url" id="f-img" placeholder="Rasm URL (ixtiyoriy)" class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs dark:text-white">
+                            <div class="sm:col-span-3">
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs shadow-md shadow-blue-600/20 transition">
+                                    + Menyuga Qo'shish
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="admin-food-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-28 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 dark:bg-blue-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-blue-500/40">
+            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xs shrink-0">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div>
+                <p id="toast-title" class="text-xs font-extrabold">Muvaffaqiyatli</p>
+                <p id="toast-desc" class="text-[11px] text-slate-300"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let currentLang = 'uz';
+        let currentCategory = 'all';
+        let currentSort = 'popular';
+        let searchQuery = '';
+        let orderMode = 'delivery';
+        let cart = [];
+
+        const i18n = {
+            uz: {
+                brandSubtitle: "Restoran & Delivery",
+                adminBtn: "Admin Panel",
+                searchPlaceholder: "Taomlarni qidirish... (Kabob, Osh, Set)",
+                heroBadge: "Ochiq 10:00 - 02:00 • Yetkazib berish 35 daqiqa",
+                heroTitle1: "DARYO — Haqiqiy ta'm va",
+                heroTitle2: "yuqori xizmat standarti",
+                heroDesc: "Saralangan yangi go'shtdan ko'mirda pishirilgan kaboblar, an'anaviy milliy taomlar va katta oilaviy setlar. Issiq holda uyingizgacha yetkazib beramiz yoki restoranimizda kutib qolamiz.",
+                btnOrderNow: "Menyuni ko'rish",
+                btnBookTable: "Stol band qilish",
+                stat1: "Tezkor yetkazish",
+                stat2: "Halol va yangi",
+                stat3: "Mijozlar bahosi",
+                heroCardTag: "Kunning Xiti",
+                heroDishName: "DARYO Shohona Mangal Set",
+                heroDishDesc: "Qo'y qovurg'asi, lula kabob, jigar, qanotchalar, kartoshka va 2 xil sous",
+                menuSubtitle: "DARYO OSHXONASI",
+                menuTitle: "Restoran Menyusi",
+                sortLabel: "Saralash:",
+                sortPopular: "Ommabop",
+                sortCheap: "Arzonroq",
+                sortExpensive: "Qimmatroq",
+                emptyTitle: "Taom topilmadi",
+                resetBtn: "Barcha taomlarni ko'rsatish",
+                bookTag: "Online Bron Qilish",
+                bookTitle: "DARYO restoranida joyingizni oldindan band qiling",
+                bookDesc: "Oilaviy tushlik, do'stlar bilan kechki ovqat yoki muhim uchrashuvlar uchun qulay hududni tanlang. Bron ma'lumotlari to'g'ridan-to'g'ri Admin Panelga tushadi.",
+                selectZoneLabel: "Hududni tanlang:",
+                zone1Title: "Asosiy Zal",
+                zone2Title: "Oilaviy Kabina",
+                zone3Title: "Daryo Terrasa",
+                zone4Title: "VIP Zal",
+                formName: "Ismingiz",
+                formPhone: "Telefon raqam",
+                formDate: "Sana va Vaqt",
+                formGuests: "Mehmonlar soni",
+                formSubmit: "Stolni Band Qilish",
+                addToCart: "Qo'shish",
+                cartTitle: "Buyurtma savati",
+                modeDelivery: "Yetkazib berish",
+                modePickup: "Olib ketish (0 so'm)",
+                subtotalLabel: "Taomlar:",
+                deliveryLabel: "Yetkazib berish:",
+                totalLabel: "Jami:",
+                checkoutBtn: "Buyurtma berish",
+                adminHeaderTitle: "DARYO — Admin Boshqaruv Paneli",
+                adminHeaderSub: "Buyurtmalar, stol bronlari va menyuni real vaqtda boshqarish",
+                closeBtn: "Yopish",
+                kpiRevenue: "Jami Tushum",
+                kpiOrders: "Buyurtmalar",
+                kpiBookings: "Stol Bronlari",
+                kpiMenu: "Menyudagi Taomlar",
+                tabOrders: "Buyurtmalar",
+                tabBookings: "Stol Bronlari",
+                tabMenu: "Menyu Boshqaruvi (+ Taom qo'shish)",
+                addDishTitle: "Yangi taom qo'shish (Darhol menyuga tushadi)",
+                currency: "so'm",
+                emptyCartText: "Savatingiz hozircha bo'sh"
+            },
+            ru: {
+                brandSubtitle: "Ресторан и Доставка",
+                adminBtn: "Админ Панель",
+                searchPlaceholder: "Поиск блюд... (Шашлык, Плов, Сет)",
+                heroBadge: "Открыто 10:00 - 02:00 • Доставка 35 минут",
+                heroTitle1: "DARYO — Истинный вкус и",
+                heroTitle2: "высокий стандарт сервиса",
+                heroDesc: "Сочные шашлыки на углях из свежего мяса, традиционные национальные блюда и большие сеты для компании. Доставим горячим или ждем вас в ресторане.",
+                btnOrderNow: "Смотреть меню",
+                btnBookTable: "Бронь стола",
+                stat1: "Быстрая доставка",
+                stat2: "Халяль и свежее",
+                stat3: "Оценка гостей",
+                heroCardTag: "Хит Дня",
+                heroDishName: "Королевский Мангал Сет DARYO",
+                heroDishDesc: "Бараньи ребрышки, люля-кебаб, печень, крылышки, картофель и 2 соуса",
+                menuSubtitle: "КУХНЯ DARYO",
+                menuTitle: "Меню Ресторана",
+                sortLabel: "Сортировка:",
+                sortPopular: "Популярные",
+                sortCheap: "Подешевле",
+                sortExpensive: "Подороже",
+                emptyTitle: "Блюда не найдены",
+                resetBtn: "Показать все блюда",
+                bookTag: "Онлайн Бронирование",
+                bookTitle: "Забронируйте стол в ресторане DARYO заранее",
+                bookDesc: "Выберите удобную зону для семейного обеда, ужина с друзьями или важной встречи. Бронь сразу поступает в Админ Панель.",
+                selectZoneLabel: "Выберите зону:",
+                zone1Title: "Основной Зал",
+                zone2Title: "Семейная Кабина",
+                zone3Title: "Терраса Daryo",
+                zone4Title: "VIP Зал",
+                formName: "Ваше имя",
+                formPhone: "Номер телефона",
+                formDate: "Дата и Время",
+                formGuests: "Количество гостей",
+                formSubmit: "Забронировать Стол",
+                addToCart: "В корзину",
+                cartTitle: "Корзина заказа",
+                modeDelivery: "Доставка",
+                modePickup: "Самовывоз (0 сум)",
+                subtotalLabel: "Блюда:",
+                deliveryLabel: "Доставка:",
+                totalLabel: "Итого:",
+                checkoutBtn: "Оформить заказ",
+                adminHeaderTitle: "DARYO — Панель Управления",
+                adminHeaderSub: "Управление заказами, бронями столов и меню в реальном времени",
+                closeBtn: "Закрыть",
+                kpiRevenue: "Общая Выручка",
+                kpiOrders: "Заказы",
+                kpiBookings: "Брони Столов",
+                kpiMenu: "Блюд в Меню",
+                tabOrders: "Заказы",
+                tabBookings: "Брони Столов",
+                tabMenu: "Управление Меню (+ Добавить блюдо)",
+                addDishTitle: "Добавить новое блюдо (Сразу появится в меню)",
+                currency: "сум",
+                emptyCartText: "Ваша корзина пока пуста"
+            }
+        };
+
+        const categories = [
+            { id: 'all', icon: 'fa-border-all', uz: 'Barchasi', ru: 'Все' },
+            { id: 'milliy', icon: 'fa-bowl-rice', uz: 'Milliy taomlar', ru: 'Национальные' },
+            { id: 'mangal', icon: 'fa-fire-flame-curved', uz: 'Shashlik va Kabob', ru: 'Шашлык и Кебаб' },
+            { id: 'fastfood', icon: 'fa-burger', uz: 'Fast-Food', ru: 'Фаст-фуд' },
+            { id: 'sets', icon: 'fa-utensils', uz: 'Setlar', ru: 'Сеты' },
+            { id: 'drinks', icon: 'fa-glass-water', uz: 'Ichimliklar', ru: 'Напитки' },
+            { id: 'soups', icon: 'fa-bowl-food', uz: 'Sho\'rvalar', ru: 'Супы' },
+            { id: 'salads', icon: 'fa-leaf', uz: 'Salatlar', ru: 'Салаты' },
+            { id: 'desserts', icon: 'fa-cake-candles', uz: 'Shirinliklar', ru: 'Десерты' }
+        ];
+
+        let menuItems = [
+            {
+                id: 1,
+                category: 'milliy',
+                price: 48000,
+                weight: '420g',
+                nameUz: 'Daryo Maxsus To\'y Oshi',
+                nameRu: 'Праздничный Плов Daryo',
+                descUz: 'Lazer guruch, yumshoq mol go\'shti, sariq sabzi, bedana tuxumi va qazi bilan.',
+                descRu: 'Рис Лазер, томленая говядина, желтая морковь, перепелиное яйцо и казы.',
+                img: 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 2,
+                category: 'mangal',
+                price: 34000,
+                weight: '180g',
+                nameUz: 'Qo\'y Go\'shtidan Kuskovoy Kabob',
+                nameRu: 'Шашлык Кусковой из Баранины',
+                descUz: 'Marinadlangan yumshoq qo\'y go\'shti, dumba va qizil piyoz bilan.',
+                descRu: 'Нежная маринованная баранина с курдюком и маринованным луком.',
+                img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 3,
+                category: 'sets',
+                price: 225000,
+                weight: '1.4 kg',
+                nameUz: 'DARYO Shohona Mangal Set',
+                nameRu: 'Королевский Мангал Сет DARYO',
+                descUz: 'Qo\'y qovurg\'asi, lula kabob, jigar, tovuq qanotlari, kartoshka va 2 xil sous.',
+                descRu: 'Бараньи ребрышки, люля-кебаб, печень, крылышки, картофель и 2 соуса.',
+                img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 4,
+                category: 'mangal',
+                price: 29000,
+                weight: '170g',
+                nameUz: 'Gijduvon Lula Kabob',
+                nameRu: 'Гиждуванский Люля-Кебаб',
+                descUz: 'Ziravorlar bilan chopilgan sersuv qiyma kabob, issiq non va piyoz bilan.',
+                descRu: 'Сочный рубленый кебаб со специями, подается со свежей лепешкой.',
+                img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 5,
+                category: 'milliy',
+                price: 68000,
+                weight: '450g',
+                nameUz: 'Qozon Kabob (Qo\'y qovurg\'asi)',
+                nameRu: 'Казан-Кебаб из Бараньих Ребрышек',
+                descUz: 'Qozonda qizartirib pishirilgan qo\'y qovurg\'alari va tillarang kartoshka.',
+                descRu: 'Обжаренные в казане нежные бараньи ребрышки с золотистым картофелем.',
+                img: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 6,
+                category: 'milliy',
+                price: 54000,
+                weight: '400g',
+                nameUz: 'Vaguri (Jiz-Biz)',
+                nameRu: 'Вагури из Баранины',
+                descUz: 'Yumshoq pishgan qo\'y go\'shti, piyoz va ziravorlar bilan milliy taom.',
+                descRu: 'Тающая во рту баранина, обжаренная с луком и восточными специями.',
+                img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 7,
+                category: 'fastfood',
+                price: 52000,
+                weight: '380g',
+                nameUz: 'Daryo Double Cheese Burger + Fri',
+                nameRu: 'Дабл Чизбургер Daryo + Фри',
+                descUz: '2 ta mramor mol go\'shti kotleti, Cheddar pishlog\'i va kartoshka fri.',
+                descRu: 'Две котлеты из мраморной говядины, сыр Чеддер и картофель фри.',
+                img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 8,
+                category: 'sets',
+                price: 155000,
+                weight: '950g',
+                nameUz: 'Oilaviy Crispy & Burger Set',
+                nameRu: 'Семейный Сет Бургер и Крылышки',
+                descUz: '2 ta burger, 8 dona qarsildoq qanotchalar, 2 porsiya fri va 1L ichimlik.',
+                descRu: '2 бургера, 8 хрустящих крылышек, 2 порции фри и 1л напитка.',
+                img: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 9,
+                category: 'fastfood',
+                price: 38000,
+                weight: '320g',
+                nameUz: 'Qarsildoq Qanotchalar (Crispy Wings)',
+                nameRu: 'Хрустящие Крылышки со Специями',
+                descUz: 'Maxsus panirovkada qizartirilgan tovuq qanotchalari va pishloqli sous.',
+                descRu: 'Обжаренные в хрустящей панировке куриные крылышки с сырным соусом.',
+                img: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 10,
+                category: 'mangal',
+                price: 46000,
+                weight: '220g',
+                nameUz: 'Napoleon Go\'shtli Kabob',
+                nameRu: 'Шашлык Наполеон из Говядины',
+                descUz: 'Yupqa kesilgan mol go\'shti va dumba qatlamlari ko\'mirda pishirilgan.',
+                descRu: 'Слоеный шашлык из тонких ломтиков мраморной говядины и курдюка.',
+                img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 11,
+                category: 'drinks',
+                price: 26000,
+                weight: '500 ml',
+                nameUz: 'Moviy Okean & Laym Mojito',
+                nameRu: 'Мохито Голубой Океан и Лайм',
+                descUz: 'Yangi yalpiz barglari, laym bo\'laklari, Blue Curacao siropi va muz.',
+                descRu: 'Свежая мята, дольки лайма, сироп Блю Кюрасао и дробленый лед.',
+                img: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=700&q=80'
+            },
+            {
+                id: 12,
+                category: 'drinks',
+                price: 34000,
+                weight: '1 Litr',
+                nameUz: 'Rezavor Mevali Daryo Mors (1L)',
+                nameRu: 'Ягодный Морс Daryo (1Л)',
+                descUz: 'Qulupnay, malina va qorag\'atdan tayyorlangan vitaminli salqin ichimlik.',
+                descRu: 'Натуральный охлажденный морс из клубники, малины и смородины.',
+                img: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=700&q=80'
+            },
+            { id: 13, category: 'soups', price: 36000, weight: '450g', nameUz: 'Lag\'mon sho\'rva', nameRu: 'Лагман суп', descUz: 'Qo\'lda cho\'zilgan lag\'mon, mol go\'shti va sabzavotlar.', descRu: 'Лапша ручной работы, говядина и овощи.', img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=700&q=80' },
+            { id: 14, category: 'soups', price: 32000, weight: '400g', nameUz: 'Mastava', nameRu: 'Мастава', descUz: 'Guruch, go\'sht va sabzavotli an\'anaviy sho\'rva.', descRu: 'Традиционный суп с рисом, мясом и овощами.', img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=700&q=80' },
+            { id: 15, category: 'salads', price: 18000, weight: '220g', nameUz: 'Achichuk salat', nameRu: 'Салат Ачичук', descUz: 'Pomidor, piyoz va achchiq qalampir bilan.', descRu: 'Помидоры, лук и острый перец.', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=700&q=80' },
+            { id: 16, category: 'salads', price: 42000, weight: '280g', nameUz: 'Tovuqli Sezar', nameRu: 'Цезарь с курицей', descUz: 'Tovuq filesi, parmezan va qarsildoq non bilan.', descRu: 'Куриное филе, пармезан и крутоны.', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=700&q=80' },
+            { id: 17, category: 'desserts', price: 24000, weight: '160g', nameUz: 'Napoleon torti', nameRu: 'Торт Наполеон', descUz: 'Yupqa qatlamli krem bilan tayyorlangan klassik tort.', descRu: 'Классический слоёный торт с кремом.', img: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=700&q=80' },
+            { id: 18, category: 'desserts', price: 28000, weight: '150g', nameUz: 'Cheesecake', nameRu: 'Чизкейк', descUz: 'Yumshoq pishloqli desert, rezavor sous bilan.', descRu: 'Нежный сырный десерт с ягодным соусом.', img: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=700&q=80' }
+        ];
+
+        let orders = [
+            { id: 101, customer: "Sardor Aliyev", phone: "+998 90 345 11 22", address: "Chilonzor 9-kvartal, 14-uy", items: "DARYO Shohona Mangal Set x1, Moviy Okean Mojito x2", total: 277000, status: "Tayyorlanmoqda" },
+            { id: 102, customer: "Dilshod Raximov", phone: "+998 97 700 44 55", address: "Olib ketish", items: "Daryo Maxsus To'y Oshi x2", total: 96000, status: "Yangi" }
+        ];
+
+        let bookings = [
+            { id: 201, name: "Jasur Karimov", phone: "+998 93 555 77 88", zone: "Daryo Terrasa", time: "2026-10-29 19:30", guests: "4 kishi", status: "Tasdiqlandi ✓" }
+        ];
+
+        // ===== TIZIM ULANISHI =====
+        // Sayt server.js orqali ochilsa (http://...) API avtomatik ulanadi. Fayl toʻgʻridan-toʻgʻri ochilsa — demo rejim.
+        const CONFIG = { API_URL: location.protocol.startsWith('http') ? location.origin : '' };
+        let adminToken = '';
+        async function api(method, path, body) {
+            if (!CONFIG.API_URL) return null;
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (adminToken) headers.Authorization = 'Bearer ' + adminToken;
+                const r = await fetch(CONFIG.API_URL + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+                if (!r.ok) throw new Error(r.status);
+                return await r.json();
+            } catch (e) { showToast("Server xatosi", "Aloqa o'rnatilmadi"); return null; }
+        }
+        async function loadFromServer() {
+            const m = await api('GET', '/api/menu');
+            if (m && m.length) { menuItems = m; renderCategories(); renderMenu(); }
+        }
+        async function loadAdminData() {
+            const o = await api('GET', '/api/orders'); if (o) orders = o;
+            const b = await api('GET', '/api/bookings'); if (b) bookings = b;
+            renderAdmin();
+        }
+
+        // ===== SHARHLAR =====
+        let reviews = [];
+        const escHtml = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        async function loadReviews() {
+            const r = await api('GET', '/api/reviews');
+            if (r) { reviews = r; renderReviews(); }
+        }
+        function renderReviews() {
+            const box = document.getElementById('reviews-list');
+            const sum = document.getElementById('reviews-summary');
+            if (!reviews.length) {
+                sum.innerText = '';
+                box.innerHTML = '<div class="sm:col-span-2 bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-3xl p-10 text-center text-slate-500 dark:text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block"></i><p class="font-bold">Hozircha sharhlar yoʻq</p><p class="text-sm mt-1">Birinchi sharhni siz yozing!</p></div>';
+                return;
+            }
+            const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+            sum.innerText = `★ ${avg.toFixed(1)} • ${reviews.length} ta sharh`;
+            box.innerHTML = reviews.map(r => `
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between gap-2"><span class="font-extrabold text-slate-900 dark:text-white">${r.name}</span><span class="text-amber-500 text-sm">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span></div>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">${r.text}</p>
+                    <p class="text-[11px] text-slate-400 mt-3">${new Date(r.created).toLocaleDateString('uz-UZ')}</p>
+                </div>`).join('');
+        }
+        async function submitReview(e) {
+            e.preventDefault();
+            const body = { name: document.getElementById('r-name').value.trim(), rating: Number(document.getElementById('r-rating').value), text: document.getElementById('r-text').value.trim() };
+            if (CONFIG.API_URL) {
+                const r = await api('POST', '/api/reviews', body);
+                if (!r) return;
+                await loadReviews();
+            } else {
+                reviews.unshift({ id: Date.now(), name: escHtml(body.name), rating: body.rating, text: escHtml(body.text), created: new Date().toISOString() });
+                renderReviews();
+            }
+            e.target.reset();
+            showToast('Rahmat!', 'Sharhingiz qabul qilindi.');
+        }
+
+        // Light / Dark Mode Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            html.classList.toggle('dark');
+            try { localStorage.setItem('daryo-theme', html.classList.contains('dark') ? 'dark' : 'light'); } catch (e) {}
+            icon.className = html.classList.contains('dark') ? 'fa-solid fa-sun text-base' : 'fa-solid fa-moon text-base';
+        }
+
+        // UZ / RU Language Switcher
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-uz').className = lang === 'uz'
+                ? 'px-2.5 py-1 rounded-lg text-xs font-extrabold transition bg-blue-600 text-white shadow-sm'
+                : 'px-2.5 py-1 rounded-lg text-xs font-extrabold transition text-slate-600 dark:text-slate-400';
+            document.getElementById('lang-ru').className = lang === 'ru'
+                ? 'px-2.5 py-1 rounded-lg text-xs font-extrabold transition bg-blue-600 text-white shadow-sm'
+                : 'px-2.5 py-1 rounded-lg text-xs font-extrabold transition text-slate-600 dark:text-slate-400';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) el.innerText = i18n[lang][key];
+            });
+
+            document.getElementById('search-input').placeholder = i18n[lang].searchPlaceholder;
+            document.getElementById('mobile-search-input').placeholder = i18n[lang].searchPlaceholder;
+            const menuSearch = document.getElementById('menu-search-input');
+            if (menuSearch) menuSearch.placeholder = lang === 'uz' ? 'Taom qidirish...' : 'Поиск блюд...';
+
+            renderCategories();
+            renderMenu();
+            updateCartUI();
+            renderAdmin();
+        }
+
+        // Render Category Pills
+        function renderCategories() {
+            const bar = document.getElementById('category-bar');
+            bar.innerHTML = '';
+
+            categories.forEach(cat => {
+                const count = cat.id === 'all' ? menuItems.length : menuItems.filter(i => i.category === cat.id).length;
+                const active = currentCategory === cat.id;
+                const btn = document.createElement('button');
+                btn.onclick = () => {
+                    currentCategory = cat.id;
+                    renderCategories();
+                    renderMenu();
+                };
+                btn.className = active
+                    ? 'shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-extrabold text-xs bg-blue-600 text-white shadow-md shadow-blue-600/25 transition'
+                    : 'shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-blue-500 transition';
+                const label = currentLang === 'uz' ? cat.uz : cat.ru;
+                btn.innerHTML = `
+                    <i class="fa-solid ${cat.icon}"></i>
+                    <span>${label}</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] ${active ? 'bg-blue-800 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}">${count}</span>
+                `;
+                bar.appendChild(btn);
+            });
+        }
+
+        // Render Menu Grid
+        function renderMenu() {
+            const grid = document.getElementById('menu-grid');
+            const emptyState = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            let filtered = menuItems.filter(item => {
+                const matchCat = currentCategory === 'all' || item.category === currentCategory;
+                const name = (currentLang === 'uz' ? item.nameUz : item.nameRu).toLowerCase();
+                const desc = (currentLang === 'uz' ? item.descUz : item.descRu).toLowerCase();
+                const matchSearch = !searchQuery || name.includes(searchQuery) || desc.includes(searchQuery);
+                return matchCat && matchSearch;
+            });
+
+            if (currentSort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+            if (currentSort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            const currency = i18n[currentLang].currency;
+            const addText = i18n[currentLang].addToCart;
+
+            filtered.forEach(item => {
+                const name = currentLang === 'uz' ? item.nameUz : item.nameRu;
+                const desc = currentLang === 'uz' ? item.descUz : item.descRu;
+                const inCart = cart.find(c => c.id === item.id);
+
+                const actionHtml = inCart
+                    ? `<div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1">
+                            <button onclick="changeQty(${item.id}, -1)" class="w-8 h-8 rounded-lg hover:bg-blue-700 font-extrabold">-</button>
+                            <span class="text-xs font-extrabold px-2.5">${inCart.qty}</span>
+                            <button onclick="changeQty(${item.id}, 1)" class="w-8 h-8 rounded-lg hover:bg-blue-700 font-extrabold">+</button>
+                       </div>`
+                    : `<button onclick="addToCart(${item.id})" class="px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/90 hover:bg-blue-600 text-blue-600 dark:text-sky-400 hover:text-white font-extrabold text-xs transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> ${addText}
+                       </button>`;
+
+                const card = document.createElement('div');
+                card.className = 'group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
+                            <img src="${item.img}" alt="${name}" onerror="this.src='https://placehold.co/600x450/1e3a8a/ffffff?text=DARYO'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <span class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-lg">${item.weight}</span>
+                        </div>
+                        <div class="p-5 pb-3">
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 transition line-clamp-1">${name}</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">${desc}</p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5 pt-3 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/60 mt-2">
+                        <div>
+                            <span class="text-base font-black text-slate-900 dark:text-white">${item.price.toLocaleString()}</span>
+                            <span class="text-xs font-bold text-slate-400">${currency}</span>
+                        </div>
+                        ${actionHtml}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function handleSearch(val) {
+            if (val.trim().toLowerCase() === 'admin777') {
+                searchQuery = '';
+                document.getElementById('search-input').value = '';
+                document.getElementById('mobile-search-input').value = '';
+                const menuSearch = document.getElementById('menu-search-input');
+                if (menuSearch) menuSearch.value = '';
+                renderMenu();
+                openPinModal();
+                return;
+            }
+            searchQuery = val.trim().toLowerCase();
+            renderMenu();
+        }
+
+        function openPinModal() {
+            const modal = document.getElementById('pin-modal');
+            const input = document.getElementById('pin-input');
+            const err = document.getElementById('pin-error');
+            err.classList.add('hidden');
+            input.value = '';
+            modal.classList.remove('hidden');
+            setTimeout(() => input.focus(), 50);
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').classList.add('hidden');
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+        }
+
+        async function verifyPin(e) {
+            if (e) e.preventDefault();
+            const pin = document.getElementById('pin-input').value.trim();
+            const err = document.getElementById('pin-error');
+            let ok = false, msg = "Noto'g'ri PIN-kod! Qaytadan urinib ko'ring.";
+            if (!CONFIG.API_URL) {
+                ok = pin === '7777';
+            } else {
+                try {
+                    const r = await fetch(CONFIG.API_URL + '/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin }) });
+                    if (r.ok) { adminToken = (await r.json()).token; ok = true; }
+                    else if (r.status === 401) msg = "Noto'g'ri PIN-kod! Serverda ADMIN_PIN qanday berilgan bo'lsa, shuni kiriting (berilmasa: 7777).";
+                    else if (r.status === 429) msg = "Juda ko'p urinish. Serverni qayta ishga tushiring yoki 10 daqiqa kuting.";
+                    else msg = "Server /api/login topilmadi. Sayt server.js orqali ochilganmi?";
+                } catch (x) { msg = "Serverga ulanib bo'lmadi. server.js ishlayaptimi?"; }
+            }
+            if (ok) {
+                closePinModal();
+                toggleAdmin();
+                showToast('Xush kelibsiz!', 'Maxfiy Admin Panel ochildi.');
+                if (CONFIG.API_URL) loadAdminData();
+            } else {
+                err.innerText = msg;
+                err.classList.remove('hidden');
+                document.getElementById('pin-input').value = '';
+                document.getElementById('pin-input').focus();
+            }
+        }
+
+        function handleSort(val) {
+            currentSort = val;
+            renderMenu();
+        }
+
+        function resetFilters() {
+            currentCategory = 'all';
+            searchQuery = '';
+            document.getElementById('search-input').value = '';
+            document.getElementById('mobile-search-input').value = '';
+            const menuSearch = document.getElementById('menu-search-input');
+            if (menuSearch) menuSearch.value = '';
+            renderCategories();
+            renderMenu();
+        }
+
+        // Cart Functions
+        function toggleCart() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+        }
+
+        function setOrderMode(mode) {
+            orderMode = mode;
+            const delBtn = document.getElementById('mode-delivery');
+            const pickBtn = document.getElementById('mode-pickup');
+            const addrInput = document.getElementById('order-address');
+
+            if (mode === 'delivery') {
+                delBtn.className = 'py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition';
+                pickBtn.className = 'py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 transition';
+                addrInput.classList.remove('hidden');
+            } else {
+                pickBtn.className = 'py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition';
+                delBtn.className = 'py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 transition';
+                addrInput.classList.add('hidden');
+            }
+            updateCartUI();
+        }
+
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            const existing = cart.find(c => c.id === id);
+            if (existing) existing.qty += 1;
+            else cart.push({ ...item, qty: 1 });
+
+            const title = currentLang === 'uz' ? item.nameUz : item.nameRu;
+            showToast(currentLang === 'uz' ? 'Savatga qo\'shildi' : 'Добавлено в корзину', title);
+            renderMenu();
+            updateCartUI();
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(c => c.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+            }
+            renderMenu();
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const currency = i18n[currentLang].currency;
+            const totalCount = cart.reduce((sum, i) => sum + i.qty, 0);
+            const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+            const deliveryFee = (subtotal > 0 && orderMode === 'delivery') ? 15000 : 0;
+            const finalTotal = subtotal + deliveryFee;
+
+            document.getElementById('cart-badge').innerText = totalCount;
+            document.getElementById('header-cart-total').innerText = `${finalTotal.toLocaleString()} ${currency}`;
+            document.getElementById('cart-count-subtitle').innerText = currentLang === 'uz' ? `${totalCount} ta mahsulot` : `${totalCount} шт.`;
+
+            const container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-14 space-y-2">
+                        <i class="fa-solid fa-basket-shopping text-3xl text-slate-300 dark:text-slate-700"></i>
+                        <p class="text-xs text-slate-400">${i18n[currentLang].emptyCartText}</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+                cart.forEach(item => {
+                    const name = currentLang === 'uz' ? item.nameUz : item.nameRu;
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-800';
+                    div.innerHTML = `
+                        <img src="${item.img}" class="w-14 h-14 rounded-xl object-cover shrink-0" alt="">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-extrabold text-slate-900 dark:text-white truncate">${name}</h4>
+                            <p class="text-[11px] text-blue-600 dark:text-sky-400 font-bold mt-0.5">${(item.price * item.qty).toLocaleString()} ${currency}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-1">
+                            <button onclick="changeQty(${item.id}, -1)" class="w-6 h-6 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800">-</button>
+                            <span class="text-xs font-extrabold px-1">${item.qty}</span>
+                            <button onclick="changeQty(${item.id}, 1)" class="w-6 h-6 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800">+</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            document.getElementById('cart-subtotal').innerText = `${subtotal.toLocaleString()} ${currency}`;
+            document.getElementById('cart-delivery').innerText = `${deliveryFee.toLocaleString()} ${currency}`;
+            document.getElementById('cart-total').innerText = `${finalTotal.toLocaleString()} ${currency}`;
+        }
+
+        function submitOrder() {
+            if (cart.length === 0) {
+                showToast('Savat bo\'sh', 'Iltimos, avval taom tanlang!');
+                return;
+            }
+            const name = document.getElementById('order-name').value.trim() || 'Mijoz';
+            const phone = document.getElementById('order-phone').value.trim() || '+998 -- --- -- --';
+            const address = orderMode === 'delivery'
+                ? (document.getElementById('order-address').value.trim() || 'Toshkent sh.')
+                : 'Olib ketish';
+
+            const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+            const deliveryFee = orderMode === 'delivery' ? 15000 : 0;
+            const total = subtotal + deliveryFee;
+            const itemsSummary = cart.map(i => `${i.nameUz} x${i.qty}`).join(', ');
+
+            orders.unshift({
+                id: Math.floor(100 + Math.random() * 900),
+                customer: name,
+                phone: phone,
+                address: address,
+                items: itemsSummary,
+                total: total,
+                status: 'Yangi'
+            });
+
+            const newOrder = orders[0];
+            api('POST', '/api/orders', newOrder).then(r => { if (r && r.id) { newOrder.id = r.id; renderAdmin(); } });
+            cart = [];
+            document.getElementById('order-name').value = '';
+            document.getElementById('order-phone').value = '';
+            document.getElementById('order-address').value = '';
+            toggleCart();
+            renderMenu();
+            updateCartUI();
+            renderAdmin();
+            CONFIG.API_URL ? showToast('Buyurtma qabul qilindi!', 'Buyurtmangiz restoranga yuborildi.') : showToast('Demo rejim', 'Server ulanmagan — Telegramga yuborilmadi.');
+        }
+
+        // Table Booking
+        function selectZone(zoneName, btnEl) {
+            document.querySelectorAll('.zone-btn').forEach(b => {
+                b.className = 'zone-btn text-left p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500 transition';
+            });
+            btnEl.className = 'zone-btn active text-left p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50/70 dark:bg-blue-950/60 transition';
+            document.getElementById('selected-zone').value = zoneName;
+        }
+
+        function handleBooking(e) {
+            e.preventDefault();
+            const name = document.getElementById('b-name').value;
+            const phone = document.getElementById('b-phone').value;
+            const time = document.getElementById('b-time').value.replace('T', ' ');
+            const guests = document.getElementById('b-guests').value;
+            const zone = document.getElementById('selected-zone').value;
+
+            bookings.unshift({
+                id: Math.floor(200 + Math.random() * 800),
+                name,
+                phone,
+                zone,
+                time,
+                guests,
+                status: 'Kutilmoqda'
+            });
+
+            const newBooking = bookings[0];
+            api('POST', '/api/bookings', newBooking).then(r => { if (r && r.id) { newBooking.id = r.id; renderAdmin(); } });
+            document.getElementById('booking-form').reset();
+            renderAdmin();
+            showToast('Stol band qilindi!', `${name}, ${zone} (${guests}) Admin Panelga yuborildi.`);
+        }
+
+        // Admin Panel Functions
+        function toggleAdmin() {
+            document.getElementById('admin-modal').classList.toggle('hidden');
+            renderAdmin();
+        }
+
+        function switchAdminTab(tab) {
+            ['orders', 'bookings', 'menu'].forEach(t => {
+                document.getElementById(`admin-${t}-sec`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`tab-${t}`).className = t === tab
+                    ? 'px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-extrabold transition shadow-sm'
+                    : 'px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-extrabold transition';
+            });
+        }
+
+        function renderAdmin() {
+            const currency = i18n[currentLang].currency;
+            const totalRev = orders.reduce((s, o) => s + o.total, 0);
+            document.getElementById('stat-revenue').innerText = `${totalRev.toLocaleString()} ${currency}`;
+            document.getElementById('stat-orders').innerText = orders.length;
+            document.getElementById('stat-bookings').innerText = bookings.length;
+            document.getElementById('stat-items').innerText = menuItems.length;
+
+            // Render Orders
+            const oBox = document.getElementById('admin-orders-sec');
+            oBox.innerHTML = orders.map(o => `
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-blue-600 dark:text-sky-400">#${o.id}</span>
+                            <span class="text-sm font-extrabold text-slate-900 dark:text-white">${o.customer}</span>
+                            <span class="text-xs text-slate-500">${o.phone}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 font-medium">${o.items}</p>
+                        <p class="text-[11px] text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> ${o.address}</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <span class="text-sm font-black text-slate-900 dark:text-white mr-2">${o.total.toLocaleString()} ${currency}</span>
+                        <span class="px-3 py-1 rounded-lg bg-blue-500/15 text-blue-600 dark:text-sky-400 text-xs font-extrabold">${o.status}</span>
+                        <button onclick="cycleOrderStatus(${o.id})" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+                            Holatni o'zgartirish
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render Bookings
+            const bBox = document.getElementById('admin-bookings-sec');
+            bBox.innerHTML = bookings.map(b => `
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-black text-blue-600 dark:text-sky-400">#${b.id} — ${b.name} (${b.phone})</span>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 font-semibold">${b.zone} • ${b.guests} • ${b.time}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-500 text-xs font-extrabold">${b.status}</span>
+                        <button onclick="approveBooking(${b.id})" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">Tasdiqlash</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render Menu Items in Admin
+            const mBox = document.getElementById('admin-food-list');
+            mBox.innerHTML = menuItems.map(m => `
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <img src="${m.img}" class="w-12 h-12 rounded-xl object-cover shrink-0" alt="">
+                        <div class="min-w-0">
+                            <p class="text-xs font-extrabold text-slate-900 dark:text-white truncate">${currentLang === 'uz' ? m.nameUz : m.nameRu}</p>
+                            <p class="text-[11px] text-blue-600 dark:text-sky-400 font-bold">${m.price.toLocaleString()} ${currency} • ${m.weight}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteFood(${m.id})" class="w-8 h-8 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white text-xs flex items-center justify-center transition shrink-0">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function cycleOrderStatus(id) {
+            const states = ['Yangi', 'Tayyorlanmoqda', 'Yetkazildi ✓', 'Bekor qilindi'];
+            const order = orders.find(o => o.id === id);
+            if (order) {
+                const next = (states.indexOf(order.status) + 1) % states.length;
+                order.status = states[next];
+                api('PATCH', '/api/orders/' + id, { status: order.status });
+                renderAdmin();
+                showToast('Holat yangilandi', `Buyurtma #${id}: ${order.status}`);
+            }
+        }
+
+        function approveBooking(id) {
+            const b = bookings.find(x => x.id === id);
+            if (b) {
+                b.status = 'Tasdiqlandi ✓';
+                api('PATCH', '/api/bookings/' + id, { status: b.status });
+                renderAdmin();
+                showToast('Bron tasdiqlandi', `${b.name} uchun joy tasdiqlandi.`);
+            }
+        }
+
+        function addAdminFood(e) {
+            e.preventDefault();
+            const nameUz = document.getElementById('f-name-uz').value.trim();
+            const nameRu = document.getElementById('f-name-ru').value.trim();
+            const price = Number(document.getElementById('f-price').value);
+            const category = document.getElementById('f-cat').value;
+            const weight = document.getElementById('f-weight').value.trim();
+            const img = document.getElementById('f-img').value.trim() || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=700&q=80';
+
+            menuItems.unshift({
+                id: Date.now(),
+                category,
+                price,
+                weight,
+                nameUz,
+                nameRu,
+                descUz: `${nameUz} — yangi va saralangan mahsulotlardan maxsus tayyorlangan.`,
+                descRu: `${nameRu} — приготовлено из свежих отборных ингредиентов.`,
+                img
+            });
+
+            api('PUT', '/api/menu', menuItems);
+            e.target.reset();
+            renderCategories();
+            renderMenu();
+            renderAdmin();
+            showToast('Taom qo\'shildi!', `${nameUz} asosiy menyuga qo'shildi.`);
+        }
+
+        function deleteFood(id) {
+            menuItems = menuItems.filter(m => m.id !== id);
+            api('PUT', '/api/menu', menuItems);
+            renderCategories();
+            renderMenu();
+            renderAdmin();
+            showToast('O\'chirildi', 'Taom menyudan olib tashlandi.');
+        }
+
+        function showToast(title, desc) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-desc').innerText = desc;
+            toast.classList.remove('translate-y-28', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-28', 'opacity-0');
+            }, 3000);
+        }
+
+        // Init
+        document.getElementById('theme-icon').className = document.documentElement.classList.contains('dark') ? 'fa-solid fa-sun text-base' : 'fa-solid fa-moon text-base';
+        loadFromServer();
+        renderReviews();
+        loadReviews();
+        renderCategories();
+        renderMenu();
+        updateCartUI();
+        renderAdmin();
+    </script>
+</body>
+</html>
